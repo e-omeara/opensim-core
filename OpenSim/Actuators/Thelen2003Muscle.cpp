@@ -259,7 +259,8 @@ calcInextensibleTendonActiveFiberForce(SimTK::State& s,
         inextensibleTendonActiveFiberForce = 
             calcActiveFiberForceAlongTendon(    aActivation,
                                                 fiberLength,
-                                                fiberVelocity);
+                                                fiberVelocity,
+                                                getMaxIsometricForce(s));
     }
 
     return inextensibleTendonActiveFiberForce;
@@ -268,7 +269,8 @@ calcInextensibleTendonActiveFiberForce(SimTK::State& s,
 double Thelen2003Muscle::
             calcActiveFiberForceAlongTendon(double activation, 
                                             double fiberLength, 
-                                            double fiberVelocity) const
+                                            double fiberVelocity,
+                                            double fiso) const
 {
     double activeFiberForce = 0;    
     double clampedFiberLength = getPennationModel()
@@ -298,8 +300,6 @@ double Thelen2003Muscle::
                                             normFiberVelocity,
                                             fvTol,
                                             fvMaxIter);
-
-        double fiso = getMaxIsometricForce();
 
         //Evaluate the pennation angle
         double phi = getPennationModel().calcPennationAngle(fiberLength);
@@ -335,7 +335,7 @@ void Thelen2003Muscle::computeInitialFiberEquilibrium(SimTK::State& s) const
     double activation = getActivation(s);
 
     //Tolerance, in Newtons, of the desired equilibrium
-    const double tol = max( 1e-8*getMaxIsometricForce(), 
+    const double tol = max( 1e-8*getMaxIsometricForce(s), 
                             SimTK::SignificantReal * 10 );
 
     int maxIter = 20;  //Should this be user settable?
@@ -572,7 +572,7 @@ void Thelen2003Muscle::calcMuscleDynamicsInfo(const SimTK::State& s,
         // double mclLength      = getLength(s);
         double tendonSlackLen = getTendonSlackLength();
         double optFiberLen    = getOptimalFiberLength();
-        double fiso           = getMaxIsometricForce();
+        double fiso           = getMaxIsometricForce(s);
         double penHeight      = getPennationModel().getParallelogramHeight();
 
         //=========================================================================
@@ -727,7 +727,7 @@ Thelen2003Muscle::initMuscleState(const SimTK::State& s,
     const double ofl = getOptimalFiberLength();
     const double ophi= getPennationAngleAtOptimalFiberLength();
     const double vol = ofl * sin(ophi);
-    const double fiso= getMaxIsometricForce();
+    const double fiso= getMaxIsometricForce(s);
     const double vmax = getMaxContractionVelocity();
 
     //Shorter version of normalized muscle multipliers

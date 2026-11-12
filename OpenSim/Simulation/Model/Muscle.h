@@ -98,6 +98,13 @@ public:
         "Compute muscle dynamics ignoring activation dynamics. Activation is equivalent to excitation.");
 
 //=============================================================================
+// INPUTS
+//=============================================================================
+    OpenSim_DECLARE_INPUT(force_capacity, double, SimTK::Stage::Time,
+            "Optional. Fraction (0 to 1) of max_isometric_force that the "
+            "muscle can currently generate, e.g. 1 - fatigued fraction.");
+
+//=============================================================================
 // OUTPUTS
 //=============================================================================
     OpenSim_DECLARE_OUTPUT(excitation, double, getExcitation,
@@ -185,6 +192,9 @@ public:
     /** get/set the maximum isometric force (in N) that the fibers can generate */
     double getMaxIsometricForce() const; 
     void setMaxIsometricForce(double maxIsometricForce);
+
+    /** get max ismoetric force that is state dependent, i.e. affected by fatigue */
+    double getMaxIsometricForce(const SimTK::State& s) const;
 
     /** get/set the optimal length (in m) of the muscle fibers (lumped as a single fiber) */
     double getOptimalFiberLength() const;

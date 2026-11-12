@@ -33,6 +33,7 @@
 #include <OpenSim/Simulation/Model/Model.h>
 #include <OpenSim/Simulation/Manager/Manager.h>
 #include <OpenSim/Simulation/Model/CMCActuatorSubsystem.h>
+#include <OpenSim/Actuators/ThreeCompartmentFatigue.h>
 #include <OpenSim/Analyses/Kinematics.h>
 #include <OpenSim/Analyses/Actuation.h>
 #include <OpenSim/Common/DebugUtilities.h>
@@ -782,6 +783,16 @@ bool CMCTool::run()
         log_info("-----------------------------------------------------------------");
         log_info("");
 
+        // computeInitialStates must not accumulate fatigue.
+        std::vector<std::pair<const ThreeCompartmentFatigue*,
+                std::pair<double, double>>> fatigueStates;
+        for (const auto& fatigue :
+                _model->getComponentList<ThreeCompartmentFatigue>()) {
+            fatigueStates.push_back({&fatigue,
+                    {fatigue.getActiveFraction(s),
+                     fatigue.getFatiguedFraction(s)}});
+        }
+
         try {
         controller->computeInitialStates(s,_ti);
         }
@@ -798,6 +809,10 @@ bool CMCTool::run()
         time(&finishTime);
         // copy the final states from the last integration 
         s.updY() = cmcActSubsystem.getCompleteState().getY();
+        for (const auto& saved : fatigueStates) {
+            saved.first->setActiveFraction(s, saved.second.first);
+            saved.first->setFatiguedFraction(s, saved.second.second);
+        }
         log_info("----------------------------------");
         log_info("Finished computing initial states:");
         log_info("----------------------------------");

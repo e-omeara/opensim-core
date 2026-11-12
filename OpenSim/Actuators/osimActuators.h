@@ -37,6 +37,7 @@
 #include "Thelen2003Muscle_Deprecated.h"
 #include "Thelen2003Muscle.h"
 #include "RigidTendonMuscle.h"
+#include "ThreeCompartmentFatigue.h"
 #include "Millard2012EquilibriumMuscle.h"
 #include "Millard2012AccelerationMuscle.h"
 #include "DeGrooteFregly2016Muscle.h"

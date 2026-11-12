@@ -65,6 +65,7 @@ OSIMACTUATORS_API void RegisterTypes_osimActuators()
     Object::registerType( Delp1990Muscle_Deprecated() );
     Object::registerType( SpringGeneralizedForce() );
     Object::registerType( RigidTendonMuscle() );
+    Object::registerType( ThreeCompartmentFatigue() );
 
     Object::RegisterType( ActiveForceLengthCurve() );
     Object::RegisterType( ForceVelocityCurve() );

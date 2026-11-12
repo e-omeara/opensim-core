@@ -168,6 +168,13 @@ void Muscle::constructProperties()
 double Muscle::getMaxIsometricForce() const
 {   return get_max_isometric_force(); }
 
+double Muscle::getMaxIsometricForce(const SimTK::State& s) const
+{
+    const double fmax = get_max_isometric_force();
+    if (!getInput("force_capacity").isConnected()) return fmax;
+    return fmax * getInputValue<double>(s, "force_capacity");
+}
+
 double Muscle::getOptimalFiberLength() const
 {   return get_optimal_fiber_length(); }
 
@@ -443,7 +450,7 @@ double Muscle::getPassiveFiberForceAlongTendon(const SimTK::State& s) const
 /* get the current tendon force (N) applied to bones */
 double Muscle::getTendonForce(const SimTK::State& s) const
 {
-    return getMaxIsometricForce() * getMuscleDynamicsInfo(s).normTendonForce;
+    return getMaxIsometricForce(s) * getMuscleDynamicsInfo(s).normTendonForce;
 }
 
 /* get the current fiber stiffness (N/m) defined as the partial derivative
@@ -589,7 +596,7 @@ updMusclePotentialEnergyInfo(const SimTK::State& s) const
  */
 double Muscle::getStress(const SimTK::State& s) const
 {
-    return getActuation(s) / getMaxIsometricForce();
+    return getActuation(s) / getMaxIsometricForce(s);
 }
 
 
@@ -661,7 +668,7 @@ double Muscle::calcInextensibleTendonActiveFiberForce(SimTK::State& s,
 {
     const MuscleLengthInfo& mli = getMuscleLengthInfo(s);
     const FiberVelocityInfo& fvi = getFiberVelocityInfo(s);
-    return getMaxIsometricForce()*activation*
+    return getMaxIsometricForce(s)*activation*
         mli.fiberActiveForceLengthMultiplier*fvi.fiberForceVelocityMultiplier
         *mli.cosPennationAngle;
 }
